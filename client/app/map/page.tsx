@@ -19,7 +19,6 @@ export default function MapPage() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "live" | "open">("all");
   const [selectedId, setSelectedId] = useState("evt-1");
-  const origin = { lat: 3.4516, lng: -76.532 };
 
   const visible = useMemo(() => {
     return allEvents.filter((item) => {
@@ -71,7 +70,7 @@ export default function MapPage() {
           </button>
         </div>
         <div className="map-canvas">
-          <MapView events={visible} selectedId={selected?.id} onSelect={setSelectedId} origin={origin} />
+          <MapView events={visible} selectedId={selected?.id} onSelect={setSelectedId} />
         </div>
         {selected ? (
           <div className="map-sheet">

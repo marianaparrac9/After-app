@@ -2,11 +2,13 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AfterLogo } from "@/components/AfterLogo";
 import { IconLock, IconMail } from "@/components/Icons";
 import { useAuth } from "@/contexts/AuthProvider";
 
 export default function LoginPage() {
+  const router = useRouter();
   const { login, loading, error } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -66,7 +68,7 @@ export default function LoginPage() {
       <Link className="auth-link" href="/register">
         Don't have an account? Sign up
       </Link>
-      <button className="admin-link" type="button">
+      <button className="admin-link" type="button" onClick={() => router.push("/admin/login")}>
         Sign in as an Administrator
       </button>
     </section>

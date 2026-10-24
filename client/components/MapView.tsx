@@ -1,31 +1,20 @@
 "use client";
 
-import type { EventItem } from "@/types/models";
-
-interface MapViewProps {
-  events: EventItem[];
-  selectedId?: string;
-  onSelect?: (id: string) => void;
-  origin?: { lat: number; lng: number } | null;
-  destination?: { lat: number; lng: number } | null;
-  showRoute?: boolean;
+import { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+interface MapTag {
+  id: string;
+  latitude: number;
+  longitude: number;
+  mapLabel: string;
 }
 
-const bounds = {
-  minLat: 3.44,
-  maxLat: 3.462,
-  minLng: -76.546,
-  maxLng: -76.524,
-};
-
-const place = (lat: number, lng: number) => {
-  const x = ((lng - bounds.minLng) / (bounds.maxLng - bounds.minLng)) * 100;
-  const y = ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * 100;
-  return {
-    x: Math.min(86, Math.max(14, x)),
-    y: Math.min(86, Math.max(14, y)),
-  };
-};
+interface MapViewProps {
+  events?: MapTag[];
+  selectedId?: string;
+  onSelect?: (id: string) => void;
+}
 
 const labelPrefix = (label: string) => {
   if (label === "Rooftop") return "♪ ";
@@ -33,45 +22,59 @@ const labelPrefix = (label: string) => {
   return "";
 };
 
-export const MapView = ({
-  events,
-  selectedId,
-  onSelect,
-  origin,
-  destination,
-  showRoute,
-}: MapViewProps) => {
-  const route = showRoute && origin && destination ? [place(origin.lat, origin.lng), place(destination.lat, destination.lng)] : null;
+export const MapView = ({ events = [], selectedId, onSelect }: MapViewProps) => {
+  const box = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
 
-  return (
-    <div className="map-photo-wrap">
-      <img className="map-photo" src="/images/map/city-map.png" alt="Mapa de la ciudad" />
-      {route ? (
-        <svg className="map-route" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polyline
-            points={`${route[0].x},${route[0].y} ${route[1].x},${route[1].y}`}
-            fill="none"
-            stroke="#c218d4"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-          />
-        </svg>
-      ) : null}
-      {events.map((event) => {
-        const spot = place(event.latitude, event.longitude);
-        return (
-          <button
-            key={event.id}
-            type="button"
-            className={`map-label map-pin ${selectedId === event.id ? "selected" : ""}`}
-            style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
-            onClick={() => onSelect?.(event.id)}
-          >
-            {labelPrefix(event.mapLabel)}
-            {event.mapLabel}
-          </button>
-        );
-      })}
-    </div>
-  );
+  useEffect(() => {
+    if (!box.current || mapRef.current) return;
+
+    const map = L.map(box.current, { attributionControl: false }).setView([3.4516, -76.532], 14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    mapRef.current = map;
+
+    const pick = (event: MouseEvent) => {
+      const button = (event.target as HTMLElement | null)?.closest?.("[data-id]");
+      const id = button?.getAttribute("data-id");
+      if (id) onSelectRef.current?.(id);
+    };
+    box.current.addEventListener("click", pick);
+
+    const frame = requestAnimationFrame(() => map.invalidateSize());
+    return () => {
+      cancelAnimationFrame(frame);
+      box.current?.removeEventListener("click", pick);
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const layer = L.layerGroup().addTo(map);
+    events.forEach((event) => {
+      const selected = event.id === selectedId;
+      const icon = L.divIcon({
+        className: "map-label-icon",
+        html: `<button type="button" data-id="${event.id}" class="map-label${selected ? " selected" : ""}">${labelPrefix(event.mapLabel)}${event.mapLabel}</button>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0],
+      });
+      const marker = L.marker([event.latitude, event.longitude], { icon }).addTo(layer);
+      marker.on("click", () => onSelectRef.current?.(event.id));
+      marker.getElement()?.querySelector("button")?.addEventListener("click", () => {
+        onSelectRef.current?.(event.id);
+      });
+    });
+
+    return () => {
+      layer.remove();
+    };
+  }, [events, selectedId]);
+
+  return <div ref={box} className="leaflet-map" />;
 };
