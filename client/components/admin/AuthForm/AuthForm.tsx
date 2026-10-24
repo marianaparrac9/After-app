@@ -14,7 +14,6 @@ interface AuthFormProps {
   children: ReactNode;
 }
 
-// Estructura de las pantallas Login y Register: logo, tarjeta con campos y enlace de abajo
 export const AuthForm = ({
   label,
   submitText,

@@ -7,7 +7,6 @@ interface PageHeaderProps {
   backHref: string;
 }
 
-// Parte de arriba de las pantallas: flecha, avatar y título
 export const PageHeader = ({ title, backHref }: PageHeaderProps) => {
   return (
     <header className="page-header">

@@ -9,7 +9,6 @@ interface EventCardProps {
   liveControl?: boolean;
 }
 
-// Tarjeta de evento. Con liveControl=true es un enlace a la pantalla Live Control
 export const EventCard = ({ event, liveControl = false }: EventCardProps) => {
   const card = (
     <>

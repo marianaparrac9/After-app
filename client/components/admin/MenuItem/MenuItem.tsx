@@ -9,7 +9,6 @@ interface MenuItemProps {
   href?: string;
 }
 
-// Fila del menú de Profile. Si trae href es un enlace, si no es solo visual
 export const MenuItem = ({ icon, title, subtitle, href }: MenuItemProps) => {
   const content = (
     <>

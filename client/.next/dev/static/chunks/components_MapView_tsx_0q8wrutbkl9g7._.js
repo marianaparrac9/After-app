@@ -7,91 +7,113 @@ __turbopack_context__.s([
     ()=>MapView
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$leaflet$2f$dist$2f$leaflet$2d$src$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/leaflet/dist/leaflet-src.js [app-client] (ecmascript)");
+;
+var _s = __turbopack_context__.k.signature();
 "use client";
 ;
-const bounds = {
-    minLat: 3.44,
-    maxLat: 3.462,
-    minLng: -76.546,
-    maxLng: -76.524
-};
-const place = (lat, lng)=>{
-    const x = (lng - bounds.minLng) / (bounds.maxLng - bounds.minLng) * 100;
-    const y = (bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat) * 100;
-    return {
-        x: Math.min(86, Math.max(14, x)),
-        y: Math.min(86, Math.max(14, y))
-    };
-};
+;
+;
 const labelPrefix = (label)=>{
     if (label === "Rooftop") return "♪ ";
     if (label === "Drinks") return "🍸 ";
     return "";
 };
-const MapView = ({ events, selectedId, onSelect, origin, destination, showRoute })=>{
-    const route = showRoute && origin && destination ? [
-        place(origin.lat, origin.lng),
-        place(destination.lat, destination.lng)
-    ] : null;
+const MapView = ({ events = [], selectedId, onSelect })=>{
+    _s();
+    const box = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const mapRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const onSelectRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(onSelect);
+    onSelectRef.current = onSelect;
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "MapView.useEffect": ()=>{
+            if (!box.current || mapRef.current) return;
+            const map = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$leaflet$2f$dist$2f$leaflet$2d$src$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].map(box.current, {
+                attributionControl: false
+            }).setView([
+                3.4516,
+                -76.532
+            ], 14);
+            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$leaflet$2f$dist$2f$leaflet$2d$src$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+            mapRef.current = map;
+            const pick = {
+                "MapView.useEffect.pick": (event)=>{
+                    const button = event.target?.closest?.("[data-id]");
+                    const id = button?.getAttribute("data-id");
+                    if (id) onSelectRef.current?.(id);
+                }
+            }["MapView.useEffect.pick"];
+            box.current.addEventListener("click", pick);
+            const frame = requestAnimationFrame({
+                "MapView.useEffect.frame": ()=>map.invalidateSize()
+            }["MapView.useEffect.frame"]);
+            return ({
+                "MapView.useEffect": ()=>{
+                    cancelAnimationFrame(frame);
+                    box.current?.removeEventListener("click", pick);
+                    map.remove();
+                    mapRef.current = null;
+                }
+            })["MapView.useEffect"];
+        }
+    }["MapView.useEffect"], []);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "MapView.useEffect": ()=>{
+            const map = mapRef.current;
+            if (!map) return;
+            const layer = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$leaflet$2f$dist$2f$leaflet$2d$src$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].layerGroup().addTo(map);
+            events.forEach({
+                "MapView.useEffect": (event)=>{
+                    const selected = event.id === selectedId;
+                    const icon = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$leaflet$2f$dist$2f$leaflet$2d$src$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].divIcon({
+                        className: "map-label-icon",
+                        html: `<button type="button" data-id="${event.id}" class="map-label${selected ? " selected" : ""}">${labelPrefix(event.mapLabel)}${event.mapLabel}</button>`,
+                        iconSize: [
+                            0,
+                            0
+                        ],
+                        iconAnchor: [
+                            0,
+                            0
+                        ]
+                    });
+                    const marker = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$leaflet$2f$dist$2f$leaflet$2d$src$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].marker([
+                        event.latitude,
+                        event.longitude
+                    ], {
+                        icon
+                    }).addTo(layer);
+                    marker.on("click", {
+                        "MapView.useEffect": ()=>onSelectRef.current?.(event.id)
+                    }["MapView.useEffect"]);
+                    marker.getElement()?.querySelector("button")?.addEventListener("click", {
+                        "MapView.useEffect": ()=>{
+                            onSelectRef.current?.(event.id);
+                        }
+                    }["MapView.useEffect"]);
+                }
+            }["MapView.useEffect"]);
+            return ({
+                "MapView.useEffect": ()=>{
+                    layer.remove();
+                }
+            })["MapView.useEffect"];
+        }
+    }["MapView.useEffect"], [
+        events,
+        selectedId
+    ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "map-photo-wrap",
-        children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                className: "map-photo",
-                src: "/images/map/city-map.png",
-                alt: "Mapa de la ciudad"
-            }, void 0, false, {
-                fileName: "[project]/components/MapView.tsx",
-                lineNumber: 48,
-                columnNumber: 7
-            }, ("TURBOPACK compile-time value", void 0)),
-            route ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                className: "map-route",
-                viewBox: "0 0 100 100",
-                preserveAspectRatio: "none",
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("polyline", {
-                    points: `${route[0].x},${route[0].y} ${route[1].x},${route[1].y}`,
-                    fill: "none",
-                    stroke: "#c218d4",
-                    strokeWidth: "1.6",
-                    strokeLinecap: "round"
-                }, void 0, false, {
-                    fileName: "[project]/components/MapView.tsx",
-                    lineNumber: 51,
-                    columnNumber: 11
-                }, ("TURBOPACK compile-time value", void 0))
-            }, void 0, false, {
-                fileName: "[project]/components/MapView.tsx",
-                lineNumber: 50,
-                columnNumber: 9
-            }, ("TURBOPACK compile-time value", void 0)) : null,
-            events.map((event)=>{
-                const spot = place(event.latitude, event.longitude);
-                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                    type: "button",
-                    className: `map-label map-pin ${selectedId === event.id ? "selected" : ""}`,
-                    style: {
-                        left: `${spot.x}%`,
-                        top: `${spot.y}%`
-                    },
-                    onClick: ()=>onSelect?.(event.id),
-                    children: [
-                        labelPrefix(event.mapLabel),
-                        event.mapLabel
-                    ]
-                }, event.id, true, {
-                    fileName: "[project]/components/MapView.tsx",
-                    lineNumber: 63,
-                    columnNumber: 11
-                }, ("TURBOPACK compile-time value", void 0));
-            })
-        ]
-    }, void 0, true, {
+        ref: box,
+        className: "leaflet-map"
+    }, void 0, false, {
         fileName: "[project]/components/MapView.tsx",
-        lineNumber: 47,
-        columnNumber: 5
+        lineNumber: 79,
+        columnNumber: 10
     }, ("TURBOPACK compile-time value", void 0));
 };
+_s(MapView, "l8SZpFzaZ9yXb3c7h7PCAyJXR/g=");
 _c = MapView;
 var _c;
 __turbopack_context__.k.register(_c, "MapView");

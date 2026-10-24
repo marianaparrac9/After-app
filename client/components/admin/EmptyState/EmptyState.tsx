@@ -3,7 +3,6 @@ interface EmptyStateProps {
   subtitle?: string;
 }
 
-// Mensaje centrado para "cargando", "error" o "no hay datos"
 export const EmptyState = ({ title, subtitle }: EmptyStateProps) => {
   return (
     <div className="empty-state">

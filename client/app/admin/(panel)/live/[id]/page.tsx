@@ -15,7 +15,6 @@ const LiveControlPage = () => {
   const { selectedEvent, eventLoading, eventError, loadEvent } = useEvents();
   const { eventActivities, loadEventActivity } = useActivity();
 
-  // Al abrir la pantalla, el provider pide el evento y su actividad al server
   useEffect(() => {
     loadEvent(id);
     loadEventActivity(id);

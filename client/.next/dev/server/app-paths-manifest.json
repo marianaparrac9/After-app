@@ -1,9 +1,19 @@
 {
+  "/admin/(panel)/events/page": "app/admin/(panel)/events/page.js",
+  "/admin/(panel)/live/[id]/page": "app/admin/(panel)/live/[id]/page.js",
+  "/admin/(panel)/live/page": "app/admin/(panel)/live/page.js",
+  "/admin/(panel)/overview/page": "app/admin/(panel)/overview/page.js",
+  "/admin/events/new/page": "app/admin/events/new/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/admin/map/page": "app/admin/map/page.js",
+  "/admin/profile/page": "app/admin/profile/page.js",
   "/directions/[id]/page": "app/directions/[id]/page.js",
+  "/events/[id]/page": "app/events/[id]/page.js",
   "/home/page": "app/home/page.js",
   "/login/page": "app/login/page.js",
   "/map/page": "app/map/page.js",
   "/page": "app/page.js",
   "/profile/page": "app/profile/page.js",
-  "/saved-events/page": "app/saved-events/page.js"
+  "/saved-events/page": "app/saved-events/page.js",
+  "/search/page": "app/search/page.js"
 }

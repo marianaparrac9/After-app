@@ -2,7 +2,6 @@ import Image from 'next/image';
 import type { AfterEvent } from '@/lib/admin/types';
 import { CapacityBar } from '../CapacityBar/CapacityBar';
 
-// Tarjeta grande de un evento en vivo (pantalla Overview)
 export const LiveSummaryCard = ({ event }: { event: AfterEvent }) => {
   return (
     <div className="live-card">

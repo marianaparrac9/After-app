@@ -11,7 +11,6 @@ interface PillTabsProps {
   onSelect: (value: string) => void;
 }
 
-// Botones tipo "pastilla" para filtrar (All / Live / Upcoming / Closed)
 export const PillTabs = ({ options, selected, onSelect }: PillTabsProps) => {
   return (
     <div className="pills">

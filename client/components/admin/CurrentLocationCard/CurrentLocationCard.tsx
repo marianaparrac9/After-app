@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-// Tarjeta de abajo del mapa cuando no hay ningún evento seleccionado
 export const CurrentLocationCard = ({ backHref }: { backHref: string }) => {
   return (
     <div className="map-card">

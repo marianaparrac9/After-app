@@ -46,7 +46,6 @@ const toEvent = (item: EventItem): AfterEvent => {
   };
 };
 
-// Los eventos salen del mismo catálogo que usa App User.
 export const EventsProvider = ({ children }: { children: ReactNode }) => {
   const events = useMemo(() => eventsCatalog.map(toEvent), []);
 

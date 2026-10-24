@@ -16,15 +16,10 @@ export default function DirectionsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { loadEventById, selectedEvent } = useData();
-  const origin = { lat: 3.457, lng: -76.538 };
 
   useEffect(() => {
     if (params.id) loadEventById(params.id);
   }, [params.id]);
-
-  const destination = selectedEvent
-    ? { lat: selectedEvent.latitude, lng: selectedEvent.longitude }
-    : null;
 
   return (
     <Guard>
@@ -33,7 +28,7 @@ export default function DirectionsPage() {
           <IconClose />
         </button>
         {!selectedEvent ? <p className="empty">This destination does not exist.</p> : null}
-        {selectedEvent && destination ? (
+        {selectedEvent ? (
           <>
             <div className="map-canvas" style={{ height: 390, marginTop: 8 }}>
               <div className="route-card">
@@ -44,7 +39,7 @@ export default function DirectionsPage() {
                 </div>
                 <strong>{selectedEvent.venueName}</strong>
               </div>
-              <MapView events={[]} origin={origin} destination={destination} showRoute />
+              <MapView />
             </div>
             <div
               className="map-sheet"

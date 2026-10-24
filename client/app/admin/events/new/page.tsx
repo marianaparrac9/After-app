@@ -8,7 +8,6 @@ import { FormField } from '@/components/admin/FormField/FormField';
 import { ImageUpload } from '@/components/admin/ImageUpload/ImageUpload';
 import { Icon } from '@/components/admin/Icon/Icon';
 
-// El server solo tiene GET, así que este formulario es visual: al enviar vuelve a Events
 const NewEventPage = () => {
   const router = useRouter();
 

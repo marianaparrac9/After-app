@@ -2,7 +2,6 @@ import Image from 'next/image';
 import type { AfterEvent } from '@/lib/admin/types';
 import { Icon } from '../Icon/Icon';
 
-// Tarjetas de abajo del mapa cuando se toca un pin: el evento y su dirección
 export const SelectedEventCard = ({ event }: { event: AfterEvent }) => {
   return (
     <>

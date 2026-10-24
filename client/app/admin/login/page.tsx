@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/admin/AuthForm/AuthForm';
 import { AuthInput } from '@/components/admin/AuthInput/AuthInput';
 
-// El server solo tiene endpoints GET, así que el login es visual: entra al Overview
 const LoginPage = () => {
   const router = useRouter();
 

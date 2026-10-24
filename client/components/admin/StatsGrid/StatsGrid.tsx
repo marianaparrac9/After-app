@@ -3,7 +3,6 @@
 import { useEvents } from '@/contexts/admin/EventsProvider';
 import { StatCard } from '../StatCard/StatCard';
 
-// Las 4 tarjetas de números (Overview y Profile). Los datos vienen del EventsProvider
 export const StatsGrid = () => {
   const { stats } = useEvents();
 

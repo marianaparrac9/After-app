@@ -1,4 +1,3 @@
-// Tipos del client. Son iguales a los del server (features/*/…types.ts)
 
 export type EventStatus = 'live' | 'upcoming' | 'closed';
 

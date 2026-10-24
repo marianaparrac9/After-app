@@ -123,7 +123,6 @@ const icons = {
 
 export type IconName = keyof typeof icons;
 
-// Dibuja un icono SVG. Toma el color del texto donde se use (currentColor)
 export const Icon = ({ name, size = 20 }: { name: IconName; size?: number }) => {
   return (
     <svg

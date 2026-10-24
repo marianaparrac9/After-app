@@ -8,7 +8,6 @@ import { EventCard } from '@/components/admin/EventCard/EventCard';
 import { CreateEventButton } from '@/components/admin/CreateEventButton/CreateEventButton';
 import { EmptyState } from '@/components/admin/EmptyState/EmptyState';
 
-// Open = próximos, Set Live = en vivo, Closed = cerrados
 const tabs = [
   { value: 'upcoming', label: 'Open' },
   { value: 'live', label: 'Set Live' },

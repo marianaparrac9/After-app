@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/admin/AuthForm/AuthForm';
 import { AuthInput } from '@/components/admin/AuthInput/AuthInput';
 
-// Igual que el login: es visual, al enviar entra al Overview
 const RegisterPage = () => {
   const router = useRouter();
 
