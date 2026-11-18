@@ -7,7 +7,7 @@ import { CurrentLocationCard } from '@/components/admin/CurrentLocationCard/Curr
 import { SelectedEventCard } from '@/components/admin/SelectedEventCard/SelectedEventCard';
 import { useEvents } from '@/contexts/admin/EventsProvider';
 
-const MapView = dynamic(() => import('@/components/MapView').then((mod) => mod.MapView), {
+const MapView = dynamic(() => import('@/components/MapView/MapView').then((mod) => mod.MapView), {
   ssr: false,
 });
 

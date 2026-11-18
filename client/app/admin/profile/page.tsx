@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useProfile } from '@/contexts/admin/ProfileProvider';
+import { useAuth } from '@/contexts/AuthProvider';
 import { BackButton } from '@/components/admin/BackButton/BackButton';
 import { StatsGrid } from '@/components/admin/StatsGrid/StatsGrid';
 import { MenuItem } from '@/components/admin/MenuItem/MenuItem';
@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/admin/EmptyState/EmptyState';
 
 const ProfilePage = () => {
   const { profile, loading, error } = useProfile();
+  const { logout } = useAuth();
 
   return (
     <div className="page page--no-nav">
@@ -47,12 +48,12 @@ const ProfilePage = () => {
         <MenuItem icon="help" title="Help & Support" subtitle="FAQ, contact us" />
       </div>
 
-      <Link href="/login" className="logout">
+      <button type="button" className="logout" onClick={logout}>
         <span className="menu-item__icon">
           <Icon name="logout" size={20} />
         </span>
         Log out
-      </Link>
+      </button>
 
       <CreateEventButton />
     </div>

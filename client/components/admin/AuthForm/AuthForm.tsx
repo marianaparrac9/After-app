@@ -7,9 +7,12 @@ import { Logo } from '../Logo/Logo';
 interface AuthFormProps {
   label?: string;
   submitText: string;
+  loadingText: string;
   footerText: string;
   footerLinkText: string;
   footerHref: string;
+  loading: boolean;
+  error?: string;
   onSubmit: () => void;
   children: ReactNode;
 }
@@ -17,9 +20,12 @@ interface AuthFormProps {
 export const AuthForm = ({
   label,
   submitText,
+  loadingText,
   footerText,
   footerLinkText,
   footerHref,
+  loading,
+  error,
   onSubmit,
   children,
 }: AuthFormProps) => {
@@ -33,10 +39,15 @@ export const AuthForm = ({
       <Logo />
       {label && <p className="auth__label">{label}</p>}
 
-      <form className="auth__card" onSubmit={handleSubmit}>
+      <form className="auth__card" onSubmit={handleSubmit} noValidate>
+        {error && (
+          <p className="auth__error" role="alert">
+            {error}
+          </p>
+        )}
         {children}
-        <button type="submit" className="btn">
-          {submitText}
+        <button type="submit" className="btn" disabled={loading}>
+          {loading ? loadingText : submitText}
         </button>
       </form>
 

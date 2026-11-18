@@ -7,9 +7,11 @@ import { CapacityBar } from '../CapacityBar/CapacityBar';
 interface EventCardProps {
   event: AfterEvent;
   liveControl?: boolean;
+  deleting?: boolean;
+  onDelete?: (id: string) => void;
 }
 
-export const EventCard = ({ event, liveControl = false }: EventCardProps) => {
+export const EventCard = ({ event, liveControl = false, deleting = false, onDelete }: EventCardProps) => {
   const card = (
     <>
       <Image
@@ -43,5 +45,24 @@ export const EventCard = ({ event, liveControl = false }: EventCardProps) => {
     );
   }
 
-  return <div className="event-card">{card}</div>;
+  return (
+    <div className="event-card">
+      {card}
+      {onDelete && (
+        <div className="event-card__actions">
+          <Link href={`/admin/live/${event.id}`} className="event-card__link">
+            Live control
+          </Link>
+          <button
+            type="button"
+            className="event-card__delete"
+            disabled={deleting}
+            onClick={() => onDelete(event.id)}
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };

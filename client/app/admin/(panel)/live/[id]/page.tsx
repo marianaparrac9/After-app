@@ -9,10 +9,17 @@ import { PageHeader } from '@/components/admin/PageHeader/PageHeader';
 import { StatusBadge } from '@/components/admin/StatusBadge/StatusBadge';
 import { ActivityList } from '@/components/admin/ActivityList/ActivityList';
 import { EmptyState } from '@/components/admin/EmptyState/EmptyState';
+import type { EventStatus } from '@/shared/models';
+
+const statusOptions: { value: EventStatus; label: string }[] = [
+  { value: 'live', label: 'Set Live' },
+  { value: 'open', label: 'Open' },
+  { value: 'closed', label: 'Close' },
+];
 
 const LiveControlPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { selectedEvent, eventLoading, eventError, loadEvent } = useEvents();
+  const { selectedEvent, eventLoading, eventError, loadEvent, updateEventStatus, updatingId } = useEvents();
   const { eventActivities, loadEventActivity } = useActivity();
 
   useEffect(() => {
@@ -22,6 +29,7 @@ const LiveControlPage = () => {
 
   const event = selectedEvent?.id === id ? selectedEvent : null;
   const percent = event ? getCapacityPercent(event.attendees, event.capacity) : 0;
+  const updating = updatingId === id;
 
   let tag = '';
   if (percent >= 100) tag = 'FULL';
@@ -58,8 +66,26 @@ const LiveControlPage = () => {
             </div>
           </div>
 
+          <div className="status-actions">
+            {statusOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={event.rawStatus === option.value ? 'status-action active' : 'status-action'}
+                disabled={updating || event.rawStatus === option.value}
+                onClick={() => updateEventStatus(event.id, option.value)}
+              >
+                {updating ? 'Saving...' : option.label}
+              </button>
+            ))}
+          </div>
+
           <h2 className="live-activity-title">Live Activity</h2>
-          <ActivityList activities={eventActivities} bordered />
+          {eventActivities.length === 0 ? (
+            <EmptyState title="Nobody has checked in yet" subtitle="New arrivals show up here in real time" />
+          ) : (
+            <ActivityList activities={eventActivities} bordered />
+          )}
         </>
       )}
     </>

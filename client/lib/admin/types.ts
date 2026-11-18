@@ -1,4 +1,3 @@
-
 export type EventStatus = 'live' | 'upcoming' | 'closed';
 
 export interface AfterEvent {
@@ -15,6 +14,7 @@ export interface AfterEvent {
   longitude: number;
   image: string;
   status: EventStatus;
+  rawStatus: string;
   attendees: number;
   capacity: number;
 }
@@ -27,14 +27,14 @@ export interface EventStats {
 }
 
 export interface Activity {
-  id: number;
+  id: string;
   eventId: string;
   time: string;
   message: string;
 }
 
 export interface Profile {
-  id: number;
+  id: string;
   name: string;
   username: string;
   email: string;

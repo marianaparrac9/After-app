@@ -16,7 +16,7 @@ const filters = [
 ];
 
 const EventsPage = () => {
-  const { events, loading, error } = useEvents();
+  const { events, loading, error, deletingId, deleteEvent } = useEvents();
   const [filter, setFilter] = useState('all');
 
   const visibleEvents =
@@ -24,18 +24,30 @@ const EventsPage = () => {
       ? events
       : events.filter((event) => event.status === filter);
 
+  const handleDelete = (id: string) => {
+    const event = events.find((item) => item.id === id);
+    if (event && window.confirm(`Delete ${event.name}? This can not be undone.`)) {
+      void deleteEvent(id);
+    }
+  };
+
   return (
     <>
       <PageHeader title="Edit Event" backHref="/admin/overview" />
       <PillTabs options={filters} selected={filter} onSelect={setFilter} />
 
-      {loading && <EmptyState title="Loading events..." />}
+      {loading && events.length === 0 && <EmptyState title="Loading events..." />}
       {error && <EmptyState title="Something went wrong" subtitle={error} />}
       {!loading && !error && visibleEvents.length === 0 && (
         <EmptyState title="No events here yet" />
       )}
       {visibleEvents.map((event) => (
-        <EventCard key={event.id} event={event} />
+        <EventCard
+          key={event.id}
+          event={event}
+          deleting={deletingId === event.id}
+          onDelete={handleDelete}
+        />
       ))}
 
       <CreateEventButton />

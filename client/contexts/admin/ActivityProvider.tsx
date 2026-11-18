@@ -1,9 +1,14 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { eventsCatalog } from '@/lib/events';
+import { useAxios } from '@/contexts/AxiosProvider';
+import { useAuth } from '@/contexts/AuthProvider';
+import { getErrorMessage } from '@/lib/errors';
+import { ACTIVITY_CHANNEL, supabase } from '@/lib/supabase';
+import { toActivity } from '@/lib/admin/mappers';
 import type { Activity } from '@/lib/admin/types';
+import type { ActivityItem } from '@/shared/models';
 
 interface ActivityContextType {
   activities: Activity[];
@@ -15,35 +20,70 @@ interface ActivityContextType {
 
 const ActivityContext = createContext<ActivityContextType | null>(null);
 
-const fromCatalog = (): Activity[] =>
-  eventsCatalog.map((item, index) => ({
-    id: index + 1,
-    eventId: item.id,
-    time: item.displayTime.split(' - ')[0] || item.displayTime,
-    message:
-      item.status === 'live'
-        ? `${item.title} is live at ${item.venueName}`
-        : `${item.occupied} people at ${item.title}`,
-  }));
+const prepend = (list: Activity[], item: Activity) =>
+  list.some((activity) => activity.id === item.id) ? list : [item, ...list].slice(0, 20);
 
 export const ActivityProvider = ({ children }: { children: ReactNode }) => {
-  const activities = useMemo(() => fromCatalog(), []);
+  const axios = useAxios();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const eventIdRef = useRef<string | null>(null);
   const [eventActivities, setEventActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadEventActivity = useCallback(async (eventId: string) => {
-    setEventActivities(activities.filter((item) => item.eventId === eventId));
-  }, [activities]);
+  useEffect(() => {
+    if (!isAdmin) {
+      setActivities([]);
+      return;
+    }
+
+    const channel = supabase
+      .channel(ACTIVITY_CHANNEL)
+      .on('broadcast', { event: 'activity-created' }, ({ payload }) => {
+        const item = toActivity(payload as ActivityItem);
+        setActivities((prev) => prepend(prev, item));
+        setEventActivities((prev) => (item.eventId === eventIdRef.current ? prepend(prev, item) : prev));
+      })
+      .subscribe();
+
+    const onInit = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const { data } = await axios.get<ActivityItem[]>('/api/attendance/activity');
+        setActivities((prev) => data.map(toActivity).reduceRight(prepend, prev));
+      } catch (err) {
+        setError(getErrorMessage(err, 'Could not load the activity'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void onInit();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [axios, isAdmin]);
+
+  const loadEventActivity = useCallback(
+    async (id: string) => {
+      eventIdRef.current = id;
+      try {
+        const { data } = await axios.get<ActivityItem[]>('/api/attendance/activity', { params: { eventId: id } });
+        setEventActivities(data.map(toActivity));
+      } catch (err) {
+        setEventActivities([]);
+        setError(getErrorMessage(err, 'Could not load the activity'));
+      }
+    },
+    [axios]
+  );
 
   return (
-    <ActivityContext.Provider
-      value={{
-        activities,
-        loading: false,
-        error: null,
-        eventActivities,
-        loadEventActivity,
-      }}
-    >
+    <ActivityContext.Provider value={{ activities, loading, error, eventActivities, loadEventActivity }}>
       {children}
     </ActivityContext.Provider>
   );
