@@ -8,9 +8,14 @@ export const errorsMiddleware = (
   _next: NextFunction
 ) => {
   const boomError = Boom.isBoom(error) ? error : Boom.boomify(error);
+
+  if (boomError.output.statusCode >= 500) {
+    console.error(error);
+  }
+
   return res.status(boomError.output.statusCode).json({
     ...boomError.output.payload,
-    message: boomError.message,
+    details: boomError.data ?? undefined,
   });
 };
 
