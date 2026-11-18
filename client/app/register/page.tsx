@@ -1,9 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { AfterLogo } from "@/components/AfterLogo";
-import { IconLock, IconMail, IconPerson } from "@/components/Icons";
+import { AfterLogo } from "@/components/AfterLogo/AfterLogo";
+import { IconLock, IconMail, IconPerson } from "@/components/Icons/Icons";
+import { useAuth } from "@/contexts/AuthProvider";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -11,24 +14,39 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const onSubmit = (event: FormEvent) => {
+  const { register, loading, error, clearError } = useAuth();
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
       setMessage("Please fill in all fields");
+      return;
+    }
+    if (!EMAIL_REGEX.test(email.trim())) {
+      setMessage("Write a valid email");
+      return;
+    }
+    if (password.length < 6) {
+      setMessage("Password must have at least 6 characters");
       return;
     }
     if (password !== confirmPassword) {
       setMessage("Passwords do not match");
       return;
     }
-    setMessage("Use laura.gomez@after.app / After123!");
+    setMessage("");
+    await register({ fullName: fullName.trim(), email: email.trim(), password, role: "user" });
   };
 
   return (
     <section className="screen auth">
       <AfterLogo />
       <form className="auth-card" onSubmit={onSubmit}>
-        {message ? <p className="status-box">{message}</p> : null}
+        {message || error ? <p className="form-error" role="alert">{message || error}</p> : null}
         <label className="field">
           <span className="icon-soft">
             <IconPerson />
@@ -80,8 +98,8 @@ export default function RegisterPage() {
             aria-label="Confirm password"
           />
         </label>
-        <button className="btn" type="submit">
-          Create Account
+        <button className="btn" type="submit" disabled={loading}>
+          {loading ? "Creating..." : "Create Account"}
         </button>
       </form>
       <div className="divider">Or sign up with</div>

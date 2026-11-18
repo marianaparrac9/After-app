@@ -2,8 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { AfterLogo } from "@/components/AfterLogo";
-import { IconMail } from "@/components/Icons";
+import { AfterLogo } from "@/components/AfterLogo/AfterLogo";
+import { IconMail } from "@/components/Icons/Icons";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

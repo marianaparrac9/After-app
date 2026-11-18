@@ -1,28 +1,38 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AfterLogo } from "@/components/AfterLogo";
-import { IconLock, IconMail } from "@/components/Icons";
+import { AfterLogo } from "@/components/AfterLogo/AfterLogo";
+import { IconLock, IconMail } from "@/components/Icons/Icons";
 import { useAuth } from "@/contexts/AuthProvider";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, loading, error } = useAuth();
+  const { login, loading, error, clearError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    await login(email, password);
+    if (!email.trim() || !password) {
+      setFormError("Write your email and password");
+      return;
+    }
+    setFormError("");
+    await login(email.trim(), password);
   };
 
   return (
     <section className="screen auth">
       <AfterLogo />
       <form className="auth-card" onSubmit={onSubmit}>
-        {error ? <p className="form-error">{error}</p> : null}
+        {formError || error ? <p className="form-error" role="alert">{formError || error}</p> : null}
         <label className="field">
           <span className="icon-soft">
             <IconMail />

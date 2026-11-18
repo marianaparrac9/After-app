@@ -2,17 +2,18 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AfterLogo } from "@/components/AfterLogo";
+import { AfterLogo } from "@/components/AfterLogo/AfterLogo";
 import { useAuth } from "@/contexts/AuthProvider";
 
 export default function LoadingPage() {
-  const { user, ready, error } = useAuth();
+  const { user, ready } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!ready) return;
     const timer = window.setTimeout(() => {
-      router.replace(user ? "/home" : "/login");
+      if (!user) router.replace("/login");
+      else router.replace(user.role === "admin" ? "/admin/overview" : "/home");
     }, 900);
     return () => window.clearTimeout(timer);
   }, [ready, user, router]);
@@ -21,7 +22,6 @@ export default function LoadingPage() {
     <section className="screen auth splash">
       <AfterLogo />
       <div className="spinner" aria-label="Loading After" />
-      {error ? <p className="form-error">{error}</p> : null}
     </section>
   );
 }

@@ -1,24 +1,26 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AppScreen } from "@/components/AppScreen";
-import { Guard } from "@/components/Guard";
-import { IconBell, IconGear, IconHeart, IconHelp } from "@/components/Icons";
+import { AppScreen } from "@/components/AppScreen/AppScreen";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { IconBell, IconGear, IconHeart, IconHelp } from "@/components/Icons/Icons";
 import { useAuth } from "@/contexts/AuthProvider";
-import { useData } from "@/contexts/DataProvider";
+import { useSaved } from "@/contexts/SavedProvider";
+import { useTickets } from "@/contexts/TicketsProvider";
 import { useState } from "react";
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
-  const { savedIds, payments } = useData();
-  const myPayments = payments.filter((item) => item.clientId === user?.id);
+  const { savedIds } = useSaved();
+  const { payments } = useTickets();
+  const visited = new Set(payments.map((item) => item.product.eventId)).size;
   const router = useRouter();
   const [panel, setPanel] = useState("");
 
-  if (!user) return null;
+  if (!user) return <PrivateRoute>{null}</PrivateRoute>;
 
   return (
-    <Guard>
+    <PrivateRoute>
       <AppScreen>
         <h1 className="page-title" style={{ textAlign: "center" }}>
           Profile
@@ -40,12 +42,12 @@ export default function ProfilePage() {
             Saved
           </div>
           <div>
-            <strong>{myPayments.length}</strong>
-            Visited
+            <strong>{payments.length}</strong>
+            Tickets
           </div>
           <div>
-            <strong>2</strong>
-            Badges
+            <strong>{visited}</strong>
+            Visited
           </div>
         </div>
         <button className="menu-card" onClick={() => router.push("/saved-events")}>
@@ -93,6 +95,6 @@ export default function ProfilePage() {
           Log Out
         </button>
       </AppScreen>
-    </Guard>
+    </PrivateRoute>
   );
 }

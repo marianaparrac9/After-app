@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Guard } from "@/components/Guard";
-import { StatusBadge } from "@/components/StatusBadge";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { StatusBadge } from "@/components/StatusBadge/StatusBadge";
+import { EmptyState } from "@/components/EmptyState/EmptyState";
+import { Loader } from "@/components/Loader/Loader";
 import {
   IconBack,
   IconCalendar,
@@ -13,32 +14,37 @@ import {
   IconPin,
   IconShare,
   IconStar,
-} from "@/components/Icons";
-import { useData } from "@/contexts/DataProvider";
+} from "@/components/Icons/Icons";
+import { useEvents } from "@/contexts/EventsProvider";
+import { useSaved } from "@/contexts/SavedProvider";
+import { useTickets } from "@/contexts/TicketsProvider";
+import { useAttendance } from "@/hooks/useAttendance";
 
 export default function EventDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { loadEventById, selectedEvent, toggleSaved, savedIds, products } = useData();
-  const product = selectedEvent
-    ? products.find((item) => item.name === selectedEvent.title)
-    : null;
+  const { getEventById, loading } = useEvents();
+  const { toggleSaved, savedIds, savingId } = useSaved();
+  const { buyTicket, buying } = useTickets();
+  const selectedEvent = getEventById(params.id);
+  const { inside, checking, sending, toggleAttendance } = useAttendance(selectedEvent?.id);
 
-  useEffect(() => {
-    if (params.id) loadEventById(params.id);
-  }, [params.id]);
+  const full = selectedEvent ? selectedEvent.occupied >= selectedEvent.capacity : false;
+  const closed = selectedEvent?.status === "closed";
 
   return (
-    <Guard>
+    <PrivateRoute>
       <section className="screen detail">
-        {!selectedEvent ? (
-          <div className="empty">
-            <p>This event id does not exist.</p>
-            <button className="btn" onClick={() => router.push("/home")}>
-              Back to Home
-            </button>
-          </div>
-        ) : (
+        {!selectedEvent && loading ? <Loader text="Loading event..." /> : null}
+        {!selectedEvent && !loading ? (
+          <EmptyState
+            title="This event does not exist"
+            subtitle="It may have been removed by the venue"
+            actionText="Back to Home"
+            onAction={() => router.push("/home")}
+          />
+        ) : null}
+        {selectedEvent ? (
           <>
             <div className="hero-photo">
               <img src={selectedEvent.imageUrl} alt={selectedEvent.title} />
@@ -53,6 +59,7 @@ export default function EventDetailPage() {
                   <button
                     className="round"
                     onClick={() => toggleSaved(selectedEvent.id)}
+                    disabled={savingId === selectedEvent.id}
                     aria-label="Save event"
                   >
                     <IconHeart active={savedIds.includes(selectedEvent.id)} />
@@ -95,20 +102,44 @@ export default function EventDetailPage() {
                 {selectedEvent.occupied}/{selectedEvent.capacity}
               </strong>
             </div>
-            {product ? (
+            <button
+              className="btn"
+              type="button"
+              disabled={checking || sending || closed || (full && !inside)}
+              onClick={toggleAttendance}
+            >
+              {checking ? "Checking..." : null}
+              {!checking && sending ? "Sending..." : null}
+              {!checking && !sending && inside ? "I left the event" : null}
+              {!checking && !sending && !inside && closed ? "Event closed" : null}
+              {!checking && !sending && !inside && !closed && full ? "Event is full" : null}
+              {!checking && !sending && !inside && !closed && !full ? "I am here" : null}
+            </button>
+            {selectedEvent.ticket ? (
               <div className="info-card capacity-row">
-                <span>Ticket</span>
-                <strong>
-                  {product.price} {product.currency}
-                </strong>
+                <span>
+                  Ticket
+                  <br />
+                  <strong>
+                    {selectedEvent.ticket.price} {selectedEvent.ticket.currency}
+                  </strong>
+                </span>
+                <button
+                  className="btn small"
+                  type="button"
+                  disabled={buying}
+                  onClick={() => buyTicket(selectedEvent.ticket!.id)}
+                >
+                  {buying ? "Paying..." : "Buy"}
+                </button>
               </div>
             ) : null}
             <button className="btn" onClick={() => router.push(`/directions/${selectedEvent.id}`)}>
               Get Directions
             </button>
           </>
-        )}
+        ) : null}
       </section>
-    </Guard>
+    </PrivateRoute>
   );
 }

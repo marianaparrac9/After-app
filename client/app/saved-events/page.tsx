@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AppScreen } from "@/components/AppScreen";
-import { Guard } from "@/components/Guard";
-import { StatusBadge } from "@/components/StatusBadge";
-import { IconHeart } from "@/components/Icons";
-import { useData } from "@/contexts/DataProvider";
+import { AppScreen } from "@/components/AppScreen/AppScreen";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { StatusBadge } from "@/components/StatusBadge/StatusBadge";
+import { IconHeart } from "@/components/Icons/Icons";
+import { EmptyState } from "@/components/EmptyState/EmptyState";
+import { Loader } from "@/components/Loader/Loader";
+import { useSaved } from "@/contexts/SavedProvider";
 
 export default function SavedEventsPage() {
   const router = useRouter();
-  const { savedEvents, savedIds, toggleSaved } = useData();
+  const { savedEvents, savedIds, toggleSaved, loading, savingId, error } = useSaved();
   const [tab, setTab] = useState<"events" | "venues">("events");
 
   return (
-    <Guard>
+    <PrivateRoute>
       <AppScreen>
         <h1 className="page-title" style={{ textAlign: "center" }}>
           Saved Events
@@ -27,8 +29,15 @@ export default function SavedEventsPage() {
             Venues
           </button>
         </div>
-        {tab === "events" && savedEvents.length === 0 ? (
-          <p className="empty">You have no saved events yet. Save one from Home or Event Detail.</p>
+        {loading && savedEvents.length === 0 ? <Loader text="Loading saved events..." /> : null}
+        {error ? <EmptyState title="We could not load your saved events" subtitle={error} /> : null}
+        {!loading && !error && tab === "events" && savedEvents.length === 0 ? (
+          <EmptyState
+            title="You have no saved events yet"
+            subtitle="Save one from Home or Event Detail"
+            actionText="Explore events"
+            onAction={() => router.push("/home")}
+          />
         ) : null}
         {tab === "events"
           ? savedEvents.map((event) => (
@@ -46,7 +55,12 @@ export default function SavedEventsPage() {
                   <strong>{event.title}</strong>
                   <p className="muted">{event.venueName}</p>
                 </button>
-                <button className="heart" onClick={() => toggleSaved(event.id)} aria-label="Remove from saved">
+                <button
+                  className="heart"
+                  onClick={() => toggleSaved(event.id)}
+                  disabled={savingId === event.id}
+                  aria-label="Remove from saved"
+                >
                   <IconHeart active={savedIds.includes(event.id)} />
                 </button>
               </article>
@@ -63,10 +77,8 @@ export default function SavedEventsPage() {
               </article>
             ))
           : null}
-        {tab === "venues" && savedEvents.length === 0 ? (
-          <p className="empty">No saved venues yet.</p>
-        ) : null}
+        {!loading && tab === "venues" && savedEvents.length === 0 ? <EmptyState title="No saved venues yet" /> : null}
       </AppScreen>
-    </Guard>
+    </PrivateRoute>
   );
 }

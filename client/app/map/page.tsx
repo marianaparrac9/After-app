@@ -3,22 +3,22 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { AppScreen } from "@/components/AppScreen";
-import { Guard } from "@/components/Guard";
-import { StatusBadge } from "@/components/StatusBadge";
-import { IconBack, IconCapacity, IconFilter, IconSearch } from "@/components/Icons";
-import { useData } from "@/contexts/DataProvider";
+import { AppScreen } from "@/components/AppScreen/AppScreen";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { StatusBadge } from "@/components/StatusBadge/StatusBadge";
+import { IconBack, IconCapacity, IconFilter, IconSearch } from "@/components/Icons/Icons";
+import { useEvents } from "@/contexts/EventsProvider";
 
-const MapView = dynamic(() => import("@/components/MapView").then((mod) => mod.MapView), {
+const MapView = dynamic(() => import("@/components/MapView/MapView").then((mod) => mod.MapView), {
   ssr: false,
 });
 
 export default function MapPage() {
   const router = useRouter();
-  const { allEvents } = useData();
+  const { allEvents } = useEvents();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "live" | "open">("all");
-  const [selectedId, setSelectedId] = useState("evt-1");
+  const [selectedId, setSelectedId] = useState("");
 
   const visible = useMemo(() => {
     return allEvents.filter((item) => {
@@ -36,7 +36,7 @@ export default function MapPage() {
   const selected = visible.find((item) => item.id === selectedId) || visible[0];
 
   return (
-    <Guard>
+    <PrivateRoute>
       <AppScreen className="map-screen">
         <div className="map-search">
           <button className="icon-btn" onClick={() => router.push("/home")} aria-label="Back">
@@ -95,6 +95,6 @@ export default function MapPage() {
           <p className="empty">No events in this area.</p>
         )}
       </AppScreen>
-    </Guard>
+    </PrivateRoute>
   );
 }

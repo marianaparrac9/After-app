@@ -1,33 +1,31 @@
 "use client";
 
-import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { AppScreen } from "@/components/AppScreen";
-import { Guard } from "@/components/Guard";
-import { IconClose, IconPin } from "@/components/Icons";
-import { useData } from "@/contexts/DataProvider";
+import { AppScreen } from "@/components/AppScreen/AppScreen";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { IconClose, IconPin } from "@/components/Icons/Icons";
+import { Loader } from "@/components/Loader/Loader";
+import { useEvents } from "@/contexts/EventsProvider";
 
-const MapView = dynamic(() => import("@/components/MapView").then((mod) => mod.MapView), {
+const MapView = dynamic(() => import("@/components/MapView/MapView").then((mod) => mod.MapView), {
   ssr: false,
 });
 
 export default function DirectionsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { loadEventById, selectedEvent } = useData();
-
-  useEffect(() => {
-    if (params.id) loadEventById(params.id);
-  }, [params.id]);
+  const { getEventById, loading } = useEvents();
+  const selectedEvent = getEventById(params.id);
 
   return (
-    <Guard>
+    <PrivateRoute>
       <AppScreen className="map-screen">
         <button className="icon-btn close-top" onClick={() => router.back()} aria-label="Close">
           <IconClose />
         </button>
-        {!selectedEvent ? <p className="empty">This destination does not exist.</p> : null}
+        {!selectedEvent && loading ? <Loader text="Loading destination..." /> : null}
+        {!selectedEvent && !loading ? <p className="empty">This destination does not exist.</p> : null}
         {selectedEvent ? (
           <>
             <div className="map-canvas" style={{ height: 390, marginTop: 8 }}>
@@ -39,7 +37,17 @@ export default function DirectionsPage() {
                 </div>
                 <strong>{selectedEvent.venueName}</strong>
               </div>
-              <MapView />
+              <MapView
+                events={[
+                  {
+                    id: selectedEvent.id,
+                    latitude: selectedEvent.latitude,
+                    longitude: selectedEvent.longitude,
+                    mapLabel: selectedEvent.mapLabel || selectedEvent.venueName,
+                  },
+                ]}
+                selectedId={selectedEvent.id}
+              />
             </div>
             <div
               className="map-sheet"
@@ -63,6 +71,6 @@ export default function DirectionsPage() {
           </>
         ) : null}
       </AppScreen>
-    </Guard>
+    </PrivateRoute>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AppScreen } from "@/components/AppScreen";
-import { Guard } from "@/components/Guard";
-import { IconClose } from "@/components/Icons";
-import { useData } from "@/contexts/DataProvider";
+import { AppScreen } from "@/components/AppScreen/AppScreen";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { IconClose } from "@/components/Icons/Icons";
+import { useEvents } from "@/contexts/EventsProvider";
 
 const categories = ["all", "concert", "party", "rooftop", "bar", "popup"];
 const times = ["all", "today", "tonight", "tomorrow", "weekend"];
@@ -20,10 +20,10 @@ const label = (value: string) => {
 
 export default function SearchPage() {
   const router = useRouter();
-  const { filters, setFilters, loadEvents, events } = useData();
+  const { filters, setFilters, resetFilters, events } = useEvents();
 
   return (
-    <Guard>
+    <PrivateRoute>
       <AppScreen>
         <button className="icon-btn close-top" onClick={() => router.back()} aria-label="Close filters">
           <IconClose />
@@ -84,30 +84,19 @@ export default function SearchPage() {
         </div>
         <button
           className="btn"
-          onClick={() => {
-            loadEvents(filters);
-            router.push("/home");
-          }}
+          onClick={() => router.push("/home")}
         >
           Apply Filters
         </button>
         <button
           className="see-all"
           style={{ display: "block", margin: "12px auto" }}
-          onClick={() =>
-            setFilters({
-              search: "",
-              category: "all",
-              status: "all",
-              time: "all",
-              maxDistance: 5,
-            })
-          }
+          onClick={resetFilters}
         >
           Clear filters
         </button>
-        <p className="demo-note">{events.length} events currently loaded before applying.</p>
+        <p className="demo-note">{events.length} events match these filters.</p>
       </AppScreen>
-    </Guard>
+    </PrivateRoute>
   );
 }

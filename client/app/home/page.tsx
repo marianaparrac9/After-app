@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AppScreen } from "@/components/AppScreen";
-import { Guard } from "@/components/Guard";
-import { StatusBadge } from "@/components/StatusBadge";
-import { AfterLogo } from "@/components/AfterLogo";
-import { IconPin, IconSearch } from "@/components/Icons";
-import { useData } from "@/contexts/DataProvider";
+import { AppScreen } from "@/components/AppScreen/AppScreen";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { StatusBadge } from "@/components/StatusBadge/StatusBadge";
+import { AfterLogo } from "@/components/AfterLogo/AfterLogo";
+import { IconPin, IconSearch } from "@/components/Icons/Icons";
+import { EmptyState } from "@/components/EmptyState/EmptyState";
+import { Loader } from "@/components/Loader/Loader";
+import { useEvents } from "@/contexts/EventsProvider";
+import { useSaved } from "@/contexts/SavedProvider";
 
 const categories = ["all", "music", "party", "rooftop", "bar"];
 
@@ -18,17 +21,16 @@ const statusLabel = (status: string) => {
 
 export default function HomePage() {
   const router = useRouter();
-  const { events, loading, error, loadEvents, filters, toggleSaved, savedIds } = useData();
+  const { events, allEvents, loading, error, setFilters, resetFilters, filters, reloadEvents } = useEvents();
+  const { toggleSaved, savedIds, savingId } = useSaved();
 
   const searching = filters.search.trim().length > 0;
   const happening = events.filter((item) => item.section === "happening");
   const tonight = events.filter((item) => item.section === "tonight");
-  const trending =
-    events.find((item) => item.section === "trending" && item.id === "evt-5") ||
-    events.find((item) => item.section === "trending");
+  const trending = events.find((item) => item.section === "trending");
 
   return (
-    <Guard>
+    <PrivateRoute>
       <AppScreen>
         <div className="topbar">
           <AfterLogo size="sm" />
@@ -41,7 +43,7 @@ export default function HomePage() {
           <IconSearch />
           <input
             value={filters.search}
-            onChange={(e) => loadEvents({ search: e.target.value, maxDistance: 10 })}
+            onChange={(e) => setFilters({ search: e.target.value, maxDistance: 10 })}
             placeholder="Search events,venus or categories ..."
             aria-label="Search events"
           />
@@ -51,15 +53,19 @@ export default function HomePage() {
             <button
               key={category}
               className={`chip ${filters.category === category ? "active" : ""}`}
-              onClick={() => loadEvents({ category, search: filters.search })}
+              onClick={() => setFilters({ category })}
             >
               {category === "all" ? "All" : category[0].toUpperCase() + category.slice(1)}
             </button>
           ))}
         </div>
-        {loading ? <p className="status-box">Loading events...</p> : null}
-        {error ? <p className="form-error">{error}</p> : null}
-        {!loading && events.length === 0 ? <p className="empty">No events match this search.</p> : null}
+        {loading && allEvents.length === 0 ? <Loader text="Loading events..." /> : null}
+        {error ? (
+          <EmptyState title="We could not load the events" subtitle={error} actionText="Try again" onAction={reloadEvents} />
+        ) : null}
+        {!loading && !error && events.length === 0 ? (
+          <EmptyState title="No events match this search" actionText="Clear filters" onAction={resetFilters} />
+        ) : null}
         {searching
           ? events.map((event) => (
               <article key={event.id} className="event-card">
@@ -134,16 +140,20 @@ export default function HomePage() {
             {trending ? (
               <article className="promo">
                 <button className="promo-frame" onClick={() => router.push(`/events/${trending.id}`)}>
-                  <img className="promo-art" src="/retro.png" alt="Retro Night" />
+                  <img className="promo-art" src={trending.imageUrl} alt={trending.title} />
                 </button>
-                <button className="btn small promo-save" onClick={() => toggleSaved(trending.id)}>
-                  {savedIds.includes(trending.id) ? "Saved" : "Save Event"}
+                <button
+                  className="btn small promo-save"
+                  onClick={() => toggleSaved(trending.id)}
+                  disabled={savingId === trending.id}
+                >
+                  {savingId === trending.id ? "Saving..." : savedIds.includes(trending.id) ? "Saved" : "Save Event"}
                 </button>
               </article>
             ) : null}
           </>
         ) : null}
       </AppScreen>
-    </Guard>
+    </PrivateRoute>
   );
 }

@@ -2,23 +2,24 @@
 
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Guard } from "@/components/Guard";
-import { IconBack } from "@/components/Icons";
-import { useData } from "@/contexts/DataProvider";
+import { PrivateRoute } from "@/components/PrivateRoute/PrivateRoute";
+import { IconBack } from "@/components/Icons/Icons";
+import { Loader } from "@/components/Loader/Loader";
+import { useTickets } from "@/contexts/TicketsProvider";
 
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { loadProductById, selectedProduct, loading, error } = useData();
+  const { loadProductById, selectedProduct, loading, error, buyTicket, buying } = useTickets();
 
   useEffect(() => {
     if (params.id) void loadProductById(params.id);
-  }, [params.id]);
+  }, [params.id, loadProductById]);
 
   return (
-    <Guard>
+    <PrivateRoute>
       <section className="screen detail">
-        {loading ? <p className="status-box">Loading product...</p> : null}
+        {loading ? <Loader text="Loading product..." /> : null}
         {error ? <p className="form-error">{error}</p> : null}
         {!loading && !selectedProduct ? (
           <div className="empty">
@@ -48,9 +49,12 @@ export default function ProductDetailPage() {
                 {selectedProduct.price} {selectedProduct.currency}
               </strong>
             </p>
+            <button className="btn" type="button" disabled={buying} onClick={() => buyTicket(selectedProduct.id)}>
+              {buying ? "Paying..." : "Buy Ticket"}
+            </button>
           </>
         ) : null}
       </section>
-    </Guard>
+    </PrivateRoute>
   );
 }

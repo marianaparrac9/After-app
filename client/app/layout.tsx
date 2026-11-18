@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
-import { PhoneShell } from "@/components/PhoneShell";
+import { Providers } from "@/components/Providers/Providers";
+import { PhoneShell } from "@/components/PhoneShell/PhoneShell";
 
 export const metadata: Metadata = {
   title: "After",
