@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx tsc:*)"
+    ],
+    "deny": [
+      "Read(./.env.local)",
+      "Edit(./.env.local)",
+      "Write(./.env.local)",
+      "Bash(rm -rf:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && npm run typecheck --silent 1>&2 || exit 2"
+          }
+        ]
+      }
+    ]
+  }
+}

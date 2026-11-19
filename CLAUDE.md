@@ -1,78 +1,41 @@
-# Fullstack Harness
+# After
 
-Reusable Claude Code harness for monorepos shaped as `client/` (Next.js + React) and `server/` (Express + TypeScript + PostgreSQL/Supabase). Copy `.claude/` (which contains `docs/` and `scripts/`) and this file into a project root; nothing here is project-specific.
+App para descubrir eventos de noche en Cali y ver en vivo que tan llenos estan. Tiene una app para el usuario y un panel para el administrador del evento.
 
-All Claude configuration lives in `.claude/`. Long reference material lives in `.claude/docs/` and is loaded on demand (see "Docs").
+El proyecto esta dividido en dos carpetas y cada una tiene su propio `CLAUDE.md` y su carpeta `.claude/` con reglas, skills y agentes:
 
-## Target project shape
+- `server/`: el backend con la API (Express, TypeScript, PostgreSQL de Supabase, Supabase Auth y Supabase Realtime). Ver `server/CLAUDE.md`.
+- `client/`: la app web (Next.js, React, Axios y Context). Ver `client/CLAUDE.md`.
 
-```
-<project>/
-├── client/   Next.js 16 (App Router), React 19, Tailwind 4, axios
-└── server/   Express 5, TypeScript, pg, Supabase, @hapi/boom
-```
+Cuando la tarea es solo del backend se trabaja dentro de `server/`, y cuando es solo de la app dentro de `client/`. Lo que diga el `CLAUDE.md` de cada carpeta manda sobre esta raiz.
 
-- **Server:** `src/features/<feature>/<feature>.{router,controller,service,repository,types}.ts`, plus `src/config/`, `src/db/`, `src/middlewares/`. Layered: router → controller → service → repository.
-- **Client:** `app/` (routes), `components/`, `context/`, `hooks/`, `lib/` (`axios.ts`, `config.ts`, `types.ts`, `errors.ts`). Imports use the `@/` alias.
+## Como se conectan
 
-## Commands
+1. El cliente llama a la API con axios (`NEXT_PUBLIC_API_URL`) y manda el token de Supabase en cada peticion.
+2. El server valida el token con `authMiddleware`, guarda en Supabase y responde.
+3. Cuando algo cambia (un evento nuevo, alguien entra o sale), el server lo avisa por Supabase Realtime en los canales `events` y `activity`.
+4. Los providers del cliente estan escuchando esos canales y actualizan la pantalla sin recargar.
 
-Run inside the workspace you changed.
+## Comandos desde la raiz
 
-| Workspace | Install | Dev | Typecheck | Lint | Test |
-|-----------|---------|-----|-----------|------|------|
-| `server/` | `npm install` | `npm run dev` | `npm run typecheck` | `npm run lint` | `npm test` (`node:test` via `tsx`) |
-| `client/` | `npm install` | `npm run dev` | `npm run typecheck` | `npm run lint` | `npm test` (Vitest + Testing Library) |
+- `npm run install:all`: instala server y client.
+- `npm run dev`: prende los dos al tiempo (server en `4000`, client en `3001`).
 
-## Rules (loaded by file path)
+## Harness
 
-Rules in `.claude/rules/` load automatically when a matching file is edited:
+- `.claude/` en esta raiz es el harness base de la clase (`fullstack-harness`): agentes, skills, reglas y documentacion general para proyectos con `client/` y `server/`.
+- `server/.claude/` y `client/.claude/` son ese mismo harness adaptado a After: sus reglas, sus skills (`/agregar-feature`, `/agregar-tabla`, `/emitir-evento`, `/agregar-provider`, `/agregar-componente`, `/agregar-pagina`) y sus agentes.
+- Si una regla de la raiz no coincide con el proyecto (por ejemplo Express 5 o Tailwind), se sigue la de la carpeta.
 
-- `server-layers.md`, `server-db.md`, `server-errors-auth.md` for `server/src/**`
-- `client-components.md`, `client-hooks.md`, `client-contexts.md`, `client-lib.md` for `client/**`
-- `typescript-style.md` for every `*.ts` / `*.tsx`
-- `tests.md` for test files
+## Convenciones de todo el proyecto
 
-## Skills
+- Nombres de codigo y textos de la app en ingles.
+- Sin comentarios en el codigo.
+- Nunca leer ni editar archivos `.env`; los cambios de variables van en los `.env.example`.
+- Los secretos solo viven en el server. El cliente solo usa variables `NEXT_PUBLIC_`.
 
-| Skill | Use it to |
-|-------|-----------|
-| `/add-feature` | Orchestrate a full feature (plan → server → client → tests → review) |
-| `/add-server-feature` | Add a layered server feature |
-| `/add-client-feature` | Add a client feature (components + context + hooks) |
-| `/add-component`, `/add-context`, `/add-hook` | Add one client building block |
-| `/add-db-table` | Add a table, its `initDb` entry and a repository |
-| `/add-realtime` | Add realtime events (Supabase Realtime or socket.io) |
-| `/add-file-upload` | Add file uploads (multer + Supabase Storage) |
-| `/add-auth` | Add Bearer auth on server and client |
-| `/verify` | Run typecheck, lint and tests in both workspaces |
+## Antes de dar una tarea por terminada
 
-## Agents
-
-Agents never call each other: the orchestrating skill runs them **one at a time, in order**.
-
-1. `feature-planner`: read-only; produces the API contract, tables, files and test cases.
-2. `server-writer`: writes only under `server/` (no tests).
-3. `client-writer`: writes only under `client/` (no tests).
-4. `test-writer`: writes only test files.
-5. `code-reviewer`: read-only; ends with `APPROVED` or `CHANGES REQUIRED`.
-
-## Docs (on-demand sub-skills)
-
-`.claude/docs/` holds the detailed patterns and code templates. Skills, agents and rules point to specific files; read only what the task needs. Start from `.claude/docs/README.md` (the index). Do not read the whole folder up front.
-
-## Conventions
-
-- Everything written in this repo (code, comments, error messages, docs) is in English.
-- Every behavior change ships with tests.
-- Never read or edit `.env` files; update `.env.example` instead.
-- Secrets stay on the server. Client env vars are `NEXT_PUBLIC_*` and public only.
-
-## Before calling a task done
-
-1. `npm run typecheck` passes in every touched workspace.
-2. `npm run lint` passes.
-3. `npm test` is green.
-4. `code-reviewer` returned `APPROVED`.
-
-Headless version of the whole flow: `./.claude/scripts/harness.sh "feature description"`.
+1. `npm run typecheck` sin errores en cada carpeta que se toco.
+2. Probar el cambio con un usuario y con un admin.
+3. El `code-reviewer` de la carpeta dice APROBADO.
